@@ -26,4 +26,4 @@ Les mostrare una manera de como hacer una orden de traslado mediante un botón d
 * isDynamic: false: más rígido y eficiente, sin la carga adicional de funcionalidad dinámica (recomendado cuando solo se necesita crear o modificar un registro con menos interactividad).
 
 
-###KevinJGMartinezNet
+### KevinJGMartinezNet
