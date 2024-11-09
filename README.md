@@ -25,5 +25,16 @@ Les mostrare una manera de como hacer una orden de traslado mediante un botón d
 
 * isDynamic: false: más rígido y eficiente, sin la carga adicional de funcionalidad dinámica (recomendado cuando solo se necesita crear o modificar un registro con menos interactividad).
 
+## Evento de usuario:
+
+Hace unos días les explique en el caso de realizar una orden de traslado para un proyecto mediante un #ClientScript en este caso voy a complementar otro archivo más pero ya basado y relacionado a lo eventos de usuario, este evento de usuario tiene las tres fases que se pueden implementar como funciones reservadas llamadas.
+
+* beforeSubmit
+
+* afterSubmit
+
+* beforeLoad
+
+Este evento va relacionado a mandar correos electrónicos a ciertos usuarios cuando el la orden de traslado se haya autorizado, además de poner un id de usuario en especifico para que cuando haga una orden se autorice, además de que llegue el correo electrónico.
 
 ### KevinJGMartinezNet
