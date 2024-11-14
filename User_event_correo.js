@@ -125,34 +125,75 @@ define(['N/record', 'N/runtime', 'N/currentRecord', 'N/ui/serverWidget', 'N/ui/d
                 var recipientEmails = locationMapping[idLocationOrig][idLocationDest];
                 log.error("recipientEmails", recipientEmails);
                 if (idSubsidiaria == 2) {
-                    if (newStatus == 'B') {
-                        log.debug('Orden de Traslado Aprobada', 'La orden de traslado con ID ' + newRecord.id + ' ha sido aprobada. ');
-
-                        var transferOrderId = newRecord.id;
-                        var tranid = newRecord.getValue({ fieldId: 'tranid' });
-
-                        //var accountId = runtime.accountId;  //Esta variable funcionará en productivo en sandbox no porque en vez de poner un '-' pone un '_' y no puede entrar por ende, solo para Sandbox se   tendrá que comentar, pero en productivo tiene que habilitarse.
-                        var accountId = 'numero-sb2'; //Esta variable solo sirve en Sandbox.
-                        var orderUrl = 'https://' + accountId + '.app.netsuite.com/app/accounting/transactions/trnfrord.nl?id=' + transferOrderId;
-
-                        //Formularemos el cuerpo del correo electrónico
-                        var subject = 'Orden de Traslado Aprobada';
-                        var body = 'La orden de traslado con número de documento <b>' + tranid + '</b> ha sido aprobada y está  lista para su cumplimiento. ';
-                        body += '<br><br>Puedes acceder a la orden de traslado haciendo clic en el siguiente enlace: <a href="' + orderUrl + '" target="_blank">Ver Orden de Traslado</a><br><br>';
-                        try {
-                            email.send({
-                                author: runtime.getCurrentUser().id,
-                                recipients: recipientEmails,
-                                subject: subject,
-                                body: body
+                    if (usuarios.id == 111111111111) {// poner el id del usuario
+                        try {// actualización para obtener el id del nuevo orden de traslado y dalrle valor de autorización
+                            var transferOrder = record.load({
+                                type: 'transferorder',
+                                id: newRecord.id,
+                                isDynamic: true
                             });
+                            transferOrder.setValue({ fieldId: 'orderstatus', value: 'B' });
+                            transferOrder.save();
+                            log.debug('Orden de Traslado Aprobada', 'La orden de traslado con ID ' + newRecord.id + ' ha sido actualizada y aprobada.');
 
-                            log.debug('Correo Enviado', 'Correo enviado con éxito a ' + recipientEmails.join(', '));
+                            var transferOrderId = newRecord.id;
+                            //var tranid = newRecord.getValue({ fieldId: 'tranid' });
+
+                            var accountId = 'numero';
+                            var orderUrl = 'https://' + accountId + '.app.netsuite.com/app/accounting/transactions/trnfrord.nl?id=' + transferOrderId;
+
+                            var subject = 'Orden de Traslado Aprobada';
+                            var body = 'La orden de traslado ha sido aprobada y está lista para su cumplimiento. ';
+                            body += '<br><br>Puedes acceder a la orden de traslado haciendo clic en el siguiente enlace: <a href="' + orderUrl + '" target="_blank">Ver Orden de Traslado</a><br><br>';
+                            try {
+                                email.send({
+                                    author: runtime.getCurrentUser().id,
+                                    recipients: recipientEmails,
+                                    subject: subject,
+                                    body: body
+                                });
+
+                                log.debug('Correo Enviado', 'Correo enviado con éxito a ' + recipientEmails.join(', '));
+                            } catch (e) {
+                                log.error('Error al enviar correo', 'Hubo un error al intentar enviar el correo: ' + e.message);
+                            }
+
                         } catch (e) {
-                            log.error('Error al enviar correo', 'Hubo un error al intentar enviar el correo: ' + e.message);
+                            log.error('Error al actualizar el estado de la orden', e.message);
                         }
+
                     } else {
-                        log.error("No esta en aprobación Pendiente");
+                        //if (oldStatus !== newStatus && newStatus === 'TransferOrder:Pending Fulfillment') {
+                        if (newStatus == 'B') {
+                            log.debug('Orden de Traslado Aprobada', 'La orden de traslado con ID ' + newRecord.id + ' ha sido aprobada. ');
+
+                            var transferOrderId = newRecord.id;
+                            var tranid = newRecord.getValue({ fieldId: 'tranid' });
+
+                            //var accountId = runtime.accountId;  //Esta variable funcionará en productivo en sandbox no porque en vez de poner un '-' pone un '_' y no puede entrar por ende, solo para Sandbox se   tendrá que comentar, pero en productivo tiene que habilitarse.
+                            //var accountId = 'numero-sb2'; //Esta variable solo sirve en Sandbox.
+                            var accountId = 'numero';
+                            var orderUrl = 'https://' + accountId + '.app.netsuite.com/app/accounting/transactions/trnfrord.nl?id=' + transferOrderId;
+
+                            //Formularemos el cuerpo del correo electrónico
+                            var subject = 'Orden de Traslado Aprobada';
+                            var body = 'La orden de traslado con número de documento <b>' + tranid + '</b> ha sido aprobada y está  lista para su cumplimiento. ';
+                            body += '<br><br>Puedes acceder a la orden de traslado haciendo clic en el siguiente enlace: <a href="' + orderUrl + '" target="_blank">Ver Orden de Traslado</a><br><br>';
+                            try {
+                                email.send({
+                                    author: runtime.getCurrentUser().id,
+                                    recipients: recipientEmails,
+                                    subject: subject,
+                                    body: body
+                                });
+
+                                log.debug('Correo Enviado', 'Correo enviado con éxito a ' + recipientEmails.join(', '));
+                            } catch (e) {
+                                log.error('Error al enviar correo', 'Hubo un error al intentar enviar el correo: ' + e.message);
+                            }
+                        } else {
+                            log.error("No esta en aprobación Pendiente");
+                        }
                     }
                 }
             } else {
@@ -165,7 +206,7 @@ define(['N/record', 'N/runtime', 'N/currentRecord', 'N/ui/serverWidget', 'N/ui/d
 
     }
 
-    function beforeSubmit(context) {
+    /*function beforeSubmit(context) {
         var newRecord = context.newRecord;
         var idSubsidiaria = newRecord.getValue({ fieldId: 'subsidiary' });
         var idLocationOrig = newRecord.getValue({ fieldId: 'location' });
@@ -291,7 +332,7 @@ define(['N/record', 'N/runtime', 'N/currentRecord', 'N/ui/serverWidget', 'N/ui/d
         } else {
             log.debug('Usuario No Autorizado', 'El usuario con ID ' + usuarios.id + ' no tiene permisos para aprobar la orden de traslado automáticamente.');
         }
-    }
+    }*/
 
 
     exports.beforeLoad = beforeLoad;
